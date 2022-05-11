@@ -51,10 +51,14 @@ def options():
    
     eastern = pytz.timezone('US/Eastern')
     df=pd.read_csv("sensor_data/data.csv") 
-    
-    if flask.request.method == 'GET' and request.args.get('temp') != None:
-        temp =  request.args.get('temp')
-        sensor =  request.args.get('Sensor')
+    #argList = request.json()
+
+    if  flask.request.method == 'POST':
+        
+        temp =  request.form['Data']
+      
+        sensor =  request.form['sensor_type']
+      
         current_datetime = datetime.now(eastern)
         current_datetime = current_datetime.strftime("%d/%m/%Y %H:%M:%S")
         ls = {
@@ -66,12 +70,13 @@ def options():
         
         data2 = pd.DataFrame([ls])
         df = pd.concat([df, data2])
-        
+        print('request completed')
         df.to_csv('sensor_data/data.csv',index=False)
         fig = px.scatter(df, x="Time", y="Result", hover_name="Sensor")
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
         return render_template('index.html', tables=[df.to_html()], titles=df.columns.values,graphJSON=graphJSON )
     fig = px.scatter(df, x="Time", y="Result", hover_name="Sensor")
+    print('no request')
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return render_template('index.html', tables=[df.to_html()], titles=df.columns.values,graphJSON=graphJSON)
 if __name__ == '__main__':
